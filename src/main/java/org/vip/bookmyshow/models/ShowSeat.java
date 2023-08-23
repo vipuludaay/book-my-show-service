@@ -1,22 +1,22 @@
 package org.vip.bookmyshow.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
+@Table(name = "SHOW_SEAT_MAPPING")
 public class ShowSeat extends BaseModel {
     @ManyToOne
+    @JoinColumn(name = "SHOW_ID")
     private Show show;
 
     @ManyToOne
+    @JoinColumn(name = "SEAT_ID")
     private Seat seat;
 
-    @Enumerated(EnumType.ORDINAL)
-    private SeatStatus seatStatus;
+    @Enumerated(EnumType.STRING)
+    private ShowSeatStatus showSeatStatus;
 }

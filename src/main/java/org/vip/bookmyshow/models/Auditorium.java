@@ -9,7 +9,9 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
+@Table(name = "AUDITORIUM")
 public class Auditorium extends BaseModel {
+    @Column(name = "FLOOR_NO")
     private Integer floorNo;
 
     @ElementCollection
@@ -17,5 +19,6 @@ public class Auditorium extends BaseModel {
     private List<Feature> screenTypes;
 
     @ManyToOne
+    @JoinColumn(name = "THEATRE_ID")
     private Theatre theatre;
 }
