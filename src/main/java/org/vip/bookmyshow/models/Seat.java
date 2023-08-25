@@ -27,5 +27,6 @@ public class Seat extends BaseModel {
     private Auditorium auditorium;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "SEAT_STATUS")
     private SeatStatus seatStatus;
 }

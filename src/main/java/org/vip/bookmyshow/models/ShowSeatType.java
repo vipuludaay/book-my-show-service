@@ -14,6 +14,7 @@ public class ShowSeatType extends BaseModel {
     private Show show;
 
     @Enumerated(EnumType.ORDINAL)
+    @Column(name = "SEAT_TYPE")
     private SeatType seatType;
 
     @Column(name = "PRICE")

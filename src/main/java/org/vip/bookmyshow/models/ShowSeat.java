@@ -18,5 +18,6 @@ public class ShowSeat extends BaseModel {
     private Seat seat;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "SHOW_SEAT_STATUS")
     private ShowSeatStatus showSeatStatus;
 }
