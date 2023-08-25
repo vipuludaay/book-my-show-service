@@ -37,10 +37,10 @@ public class TicketController {
             ticketResponseDto.setTicket(ticket);
             response = ResponseEntity.ok(ticketResponseDto);
         } catch (ShowNotAvailableException | ShowSeatNotAvailableException e) {
-            LOGGER.error(e.getMessage());
+            LOGGER.error("Error in TicketController :: bookTicket :: " + e.getMessage());
             response = ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(e.getMessage());
         } catch (UserNotFoundException e) {
-            LOGGER.error(e.getMessage());
+            LOGGER.error("Error in TicketController :: bookTicket :: " + e.getMessage());
             response = ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
         return response;

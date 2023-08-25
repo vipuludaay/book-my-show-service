@@ -81,7 +81,7 @@ public class TicketServiceImpl implements TicketService {
 
             // 7. If payment successful, send Ticket(BOOKED) object. Else, rollback BLOCKED for showSeats, update Ticket(FAILED).
         } catch (ShowSeatNotAvailableException | UserNotFoundException | ShowNotAvailableException e) {
-            LOGGER.error(e.getMessage());
+            LOGGER.error("Error in TicketServiceImpl :: bookTicket :: " + e.getMessage());
             throw e;
         }
         return ticket;

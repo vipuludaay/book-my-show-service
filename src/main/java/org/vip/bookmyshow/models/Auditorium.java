@@ -21,4 +21,7 @@ public class Auditorium extends BaseModel {
     @ManyToOne
     @JoinColumn(name = "THEATRE_ID")
     private Theatre theatre;
+
+    @OneToMany(mappedBy = "auditorium")
+    private List<Seat> seats;
 }

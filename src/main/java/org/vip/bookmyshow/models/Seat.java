@@ -22,6 +22,10 @@ public class Seat extends BaseModel {
     @Column(name = "COLUMN")
     private Integer column;
 
+    @ManyToOne
+    @JoinColumn(name = "AUDITORIUM_ID")
+    private Auditorium auditorium;
+
     @Enumerated(EnumType.STRING)
     private SeatStatus seatStatus;
 }

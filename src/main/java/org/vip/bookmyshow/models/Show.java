@@ -11,8 +11,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "SHOW")
 public class Show extends BaseModel {
-//    @ManyToOne
-    @ManyToOne(fetch = FetchType.LAZY)  // remove this
+    @ManyToOne
     @JoinColumn(name = "MOVIE_ID")
     private Movie movie;
 
@@ -22,8 +21,7 @@ public class Show extends BaseModel {
     @Column(name = "END_TIME")
     private LocalDateTime endTime;
 
-//    @ManyToOne
-    @ManyToOne(fetch = FetchType.LAZY)  // remove this
+    @ManyToOne
     @JoinColumn(name = "AUDITORIUM_ID")
     private Auditorium auditorium;
 }

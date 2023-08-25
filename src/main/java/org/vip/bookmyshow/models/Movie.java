@@ -23,7 +23,7 @@ public class Movie extends BaseModel {
 
     @ElementCollection
     @Enumerated(EnumType.ORDINAL)
-    private List<Feature> movieFeatures;
+    private List<Feature> features;
 
     @ElementCollection
     @Enumerated(EnumType.ORDINAL)
