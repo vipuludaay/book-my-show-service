@@ -1,11 +1,11 @@
 package org.vip.bookmyshow.models;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
-@EqualsAndHashCode(callSuper = true)
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "SHOW_SEAT_MAPPING")
 public class ShowSeat extends BaseModel {

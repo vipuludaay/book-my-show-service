@@ -31,10 +31,8 @@ public class TicketController {
     public ResponseEntity<?> bookTicket(@RequestBody TicketRequestDto ticketRequestDto) {
         ResponseEntity<?> response = null;
         try {
-            Ticket ticket = ticketService.bookTicket(ticketRequestDto.getUserId(), ticketRequestDto.getShowSeats(),
-                    ticketRequestDto.getShowId());
-            TicketResponseDto ticketResponseDto = new TicketResponseDto();
-            ticketResponseDto.setTicket(ticket);
+            TicketResponseDto ticketResponseDto = ticketService.bookTicket(ticketRequestDto.getUserId(),
+                    ticketRequestDto.getShowSeats(), ticketRequestDto.getShowId());
             response = ResponseEntity.ok(ticketResponseDto);
         } catch (ShowNotAvailableException | ShowSeatNotAvailableException e) {
             LOGGER.error("Error in TicketController :: bookTicket :: " + e.getMessage());
@@ -42,6 +40,9 @@ public class TicketController {
         } catch (UserNotFoundException e) {
             LOGGER.error("Error in TicketController :: bookTicket :: " + e.getMessage());
             response = ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        } catch (InterruptedException e) {
+            LOGGER.error("Error in TicketController :: bookTicket :: " + e.getMessage());
+            response = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
         return response;
     }

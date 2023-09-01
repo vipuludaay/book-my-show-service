@@ -1,13 +1,13 @@
 package org.vip.bookmyshow.models;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@EqualsAndHashCode(callSuper = true)
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "PAYMENT")
 public class Payment extends BaseModel {
@@ -30,5 +30,5 @@ public class Payment extends BaseModel {
 
     @ManyToOne
     @JoinColumn(name = "TICKET_ID")
-    private Ticket ticket;  // check for cyclic dependency issue, as Ticket also has List<Payment> attribute.
+    private Ticket ticket;
 }

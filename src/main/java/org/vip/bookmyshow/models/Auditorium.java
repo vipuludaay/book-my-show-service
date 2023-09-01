@@ -1,15 +1,19 @@
 package org.vip.bookmyshow.models;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
-@EqualsAndHashCode(callSuper = true)
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "AUDITORIUM")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Auditorium extends BaseModel {
     @Column(name = "FLOOR_NO")
     private Integer floorNo;
@@ -25,3 +29,8 @@ public class Auditorium extends BaseModel {
     @OneToMany(mappedBy = "auditorium")
     private List<Seat> seats;
 }
+
+/*
+@JsonIdentityInfo - will include only one unique object of Auditorium with property = "id". Rest other objects will
+have only the "id" value instead of whole Auditorium object during Serialization.
+*/

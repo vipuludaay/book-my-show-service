@@ -6,8 +6,4 @@ public class ShowSeatNotAvailableException extends Exception {
     public ShowSeatNotAvailableException(String message) {
         super(message);
     }
-
-    public ShowSeatNotAvailableException(ShowSeat showSeat) {
-        super("Seat number " + showSeat.getSeat().getSeatNumber() + " not available. Try other available seats!");
-    }
 }
