@@ -2,6 +2,8 @@ package org.vip.bookmyshow.controllers;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,7 +25,8 @@ public class TicketController {
 
     private TicketService ticketService;
 
-    public TicketController(TicketService ticketService) {
+    @Autowired
+    public TicketController(@Qualifier("ticketServiceImpl") TicketService ticketService) {
         this.ticketService = ticketService;
     }
 
@@ -40,7 +43,7 @@ public class TicketController {
         } catch (UserNotFoundException e) {
             LOGGER.error("Error in TicketController :: bookTicket :: " + e.getMessage());
             response = ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             LOGGER.error("Error in TicketController :: bookTicket :: " + e.getMessage());
             response = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }

@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class TicketServiceImpl implements TicketService {
+public class TicketServiceImplScaler implements TicketService {
     private static final Logger LOGGER = LoggerFactory.getLogger(TicketServiceImpl.class);
 
     private ShowSeatRepository showSeatRepository;
@@ -29,7 +29,7 @@ public class TicketServiceImpl implements TicketService {
     private ShowSeatLockRepository showSeatLockRepository;
 
     @Autowired
-    public TicketServiceImpl(ShowSeatRepository showSeatRepository, UserRepository userRepository,
+    public TicketServiceImplScaler(ShowSeatRepository showSeatRepository, UserRepository userRepository,
                              ShowRepository showRepository, ShowSeatLockRepository showSeatLockRepository) {
         this.showSeatRepository = showSeatRepository;
         this.userRepository = userRepository;
@@ -38,7 +38,7 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRES_NEW)
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public TicketResponseDto bookTicket(Long userId, List<Long> showSeatsIds, Long showId)
             throws ShowSeatNotAvailableException, UserNotFoundException, ShowNotAvailableException, InterruptedException {
         TicketResponseDto ticketResponseDto = null;
@@ -53,29 +53,39 @@ public class TicketServiceImpl implements TicketService {
                 throw new ShowNotAvailableException("Show with Id: " + showId + " not available!");
             }
 
-            // 2. Acquire db lock on all the passed showSeats only (not on whole table).
-            // (FETCH WITH LOCK along with Serializable Isolation level in @Transaction)
-            List<ShowSeat> showSeats = showSeatRepository.findAllByIdIn(showSeatsIds);
+            // 2. Fetch all passed showSeats from db. (FETCH WITHOUT LOCK)
+            List<ShowSeat> showSeats = showSeatRepository.findAllByIdInWithoutLock(showSeatsIds);
 
             // 3. Check if all passed showSeats are AVAILABLE or not. If not, throw an exception.
             validateAllShowSeatsAvailability(showSeats, showSeatsIds);
 
-            // 4. If AVAILABLE, update showSeats status as "LOCKED". Then, insert showSeatLock for each showSeat.
-            // "LOCKED" required to stop other users seeing these seats as AVAILABLE in BMS.
-            // showSeats is Persistent data. Any change to showSeats persists automatically. saveAll() not required.
-            showSeats.forEach(s -> s.setShowSeatStatus(ShowSeatStatus.LOCKED));
+            // 4. Acquire db lock on all the passed showSeats only (not on whole table).
+            // (FETCH WITH LOCK along with Serializable Isolation level in @Transaction)
+            showSeats = showSeatRepository.findAllByIdIn(showSeatsIds);
 
-            // 5. Insert expiry time for each showSeats in a ShowSeatLock table. This time will be checked by
+            // 5. Check for all AVAILABLE showSeats again. If not AVAILABLE, throw an exception.
+            // This is required for multiple threads that might have entered step 3 at same time
+            // as of 1st thread that acquired lock initially. Double Check Locking.
+            validateAllShowSeatsAvailability(showSeats, showSeatsIds);
+
+            // 6. If AVAILABLE, update showSeats status as "LOCKED". Then, insert showSeatLock for each showSeat.
+            // "LOCKED" required to stop other users seeing these seats as AVAILABLE in BMS.
+            // showSeats is Persistent data. any change to showSeats persists automatically. saveAll() not required.
+            showSeats.forEach(s -> s.setShowSeatStatus(ShowSeatStatus.LOCKED));
+            showSeatRepository.saveAll(showSeats);
+
+            // 7. Insert expiry time for each showSeats in a ShowSeatLock table. This time will be checked by
             // another service in every 5 minutes that if expiry < currentTime for any showSeats then
             // mark them from LOCKED to AVAILABLE. Then delete those records from ShowSeatLock table.
             LocalDateTime expiry = LocalDateTime.now().plusMinutes(BMSConstants.TRANSACTION_EXPIRY_MINUTES);
             List<ShowSeatLock> showSeatLocks = showSeats.stream().map(showSeat -> new ShowSeatLock(showSeat, expiry)).toList();
             showSeatLockRepository.saveAll(showSeatLocks);
 
-            // 6. Send temporary ticket object having show, showSeats info to client. This won't be visible to client.
+            // 8. Send temporary ticket object having show, showSeats info to client. This won't be visible to client.
             Ticket ticket = new Ticket();
             ticket.setBookedBy(user.get());
             ticket.setTicketStatus(TicketStatus.PENDING);
+            ticket.setBookingTime(LocalDateTime.now());
             ticket.setShow(show.get());
             ticket.setShowSeats(showSeats);
 
@@ -83,8 +93,8 @@ public class TicketServiceImpl implements TicketService {
             ticketResponseDto.setTicket(ticket);
             ticketResponseDto.setShowSeatLocks(showSeatLocks);
 
-            // 7. Send ticketResponseDto to client. Get payment details and then proceed to Payment via PaymentService.
-            // 8. If any one of partial payment is successful, then save Ticket object along with Payment Details.
+            // 9. Send ticketResponseDto to User. Get payment details and then proceed to Payment via PaymentService.
+            // 10. If any one of partial payment is successful, then save Ticket object along with Payment Details.
             // If all partial payments are successful and all showSeatLockIds.expiry > curTime
             // then update ticket = BOOKED and all showSeats = BOOKED.
             // Else, rollback LOCKED for all showSeats in ticket object and update Ticket = FAILED.
