@@ -14,6 +14,7 @@ import org.vip.bookmyshow.models.ShowSeat;
 import java.util.ArrayList;
 import java.util.List;
 
+@Repository
 public interface ShowSeatRepository extends JpaRepository<ShowSeat, Long> {
 
     @Query("select ss from ShowSeat ss where ss.id in ?1")
