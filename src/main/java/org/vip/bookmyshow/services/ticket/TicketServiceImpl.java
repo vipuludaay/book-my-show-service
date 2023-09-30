@@ -38,9 +38,9 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRES_NEW)
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public TicketResponseDto bookTicket(Long userId, List<Long> showSeatsIds, Long showId)
-            throws ShowSeatNotAvailableException, UserNotFoundException, ShowNotAvailableException, InterruptedException {
+            throws ShowSeatNotAvailableException, UserNotFoundException, ShowNotAvailableException {
         TicketResponseDto ticketResponseDto = null;
         try {
             // 1. Validate User and Show.
