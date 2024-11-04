@@ -29,6 +29,10 @@ public class Ticket extends BaseModel {
     @JoinColumn(name = "SHOW_ID")
     private Show show;
 
+    // @ManyToMany because 1 Ticket can have many ShowSeat which is obvious.
+    // 1 ShowSeat can be associated with many Ticket when a Ticket with a ShowSeat gets cancelled by a User
+    // and another User books the same ShowSeat later. So same ShowSeat is associated with multiple Ticket.
+    // In current version, partial Ticket cancellation not allowed. Either all ShowSeat in a Ticket get cancelled or none.
     @ManyToMany
     @JoinTable(name = "TICKET_SHOW_SEAT_MAPPING",
             joinColumns = @JoinColumn(name = "TICKET_ID"),
